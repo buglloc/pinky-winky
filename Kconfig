@@ -1,5 +1,12 @@
 source "Kconfig.zephyr"
 
+config PW_SIGN_KEY
+    string "Signing key"
+
+config PW_ROTATE_PERIOD_SEC
+    int "How ofen message will be rotated"
+    default 15
+
 config ADV_BTN_TIMES
     int "How many times button press must be notified"
     default 10

@@ -4,6 +4,7 @@
 #include <zephyr/sys/byteorder.h>
 #include <zephyr/logging/log.h>
 #include <zephyr/bluetooth/bluetooth.h>
+#include <mbedtls/sha1.h>
 
 #include "btn.h"
 
@@ -19,7 +20,8 @@ LOG_MODULE_REGISTER(pw_ble);
 #define IDX_MFG_BATT_LVL  3
 #define IDX_MFG_BTN_STATE (IDX_MFG_BATT_LVL + 1)
 #define IDX_MFG_TS        (IDX_MFG_BTN_STATE + 1)
-#define IDX_MFG_SIGN      (IDX_MFG_TS + 8)
+#define IDX_MFG_SIGN      (IDX_MFG_TS + 4)
+#define MFG_SIGN_LEN      (10)
 
 static uint8_t mfg_data[] = {
 	/* company ID must be 0xffff by spec */
@@ -31,9 +33,9 @@ static uint8_t mfg_data[] = {
 	/* button state */
 	0x00,
 	/* ts */
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	/* md5 sign */
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+	0x00, 0x00, 0x00, 0x00,
+	/* truncated to 10 bytes sha1 sign */
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
 static const struct bt_data advertising[] = {
@@ -43,14 +45,57 @@ static const struct bt_data advertising[] = {
 };
 
 static struct bt_le_ext_adv *adv = NULL;
-static uint64_t initial_ts = 0;
+static uint32_t pw_initial_ts = 0;
+static uint32_t pw_last_ts = 0;
+
+static uint8_t mfg_hash_buf[20] = {};
+static mbedtls_sha1_context mfg_hash_ctx;
+
+int pw_ble_update_mfg_sign()
+{
+	int err;
+
+	err = mbedtls_sha1_starts(&mfg_hash_ctx);
+	if (err) {
+		LOG_ERR("failed to start sha1 hash (err %d)", err);
+		return -1;
+	}
+
+	err = mbedtls_sha1_update(&mfg_hash_ctx, &mfg_data[0], IDX_MFG_SIGN);
+	if (err) {
+		LOG_ERR("failed to update hash (err %d)", err);
+		return -1;
+	}
+
+	err = mbedtls_sha1_update(&mfg_hash_ctx, CONFIG_PW_SIGN_KEY, sizeof(CONFIG_PW_SIGN_KEY) - 1);
+	if (err) {
+		LOG_ERR("failed to update hash (err %d)", err);
+		return -1;
+	}
+
+	err = mbedtls_sha1_finish(&mfg_hash_ctx, mfg_hash_buf);
+	if (err) {
+		LOG_ERR("failed to calculate hash (err %d)", err);
+		return -1;
+	}
+
+	memcpy(&mfg_data[IDX_MFG_SIGN], mfg_hash_buf, MFG_SIGN_LEN);
+	return 0;
+}
 
 void pw_ble_update_adv_data()
 {
 	int err;
 
-	mfg_data[IDX_MFG_BTN_STATE] = pw_btn_is_pressed() ? 1 : 0;
-	sys_put_be64(initial_ts, &mfg_data[IDX_MFG_TS]);
+	pw_last_ts = pw_initial_ts + k_uptime_seconds();
+	LOG_INF("upd: %u", pw_last_ts);
+	mfg_data[IDX_MFG_BTN_STATE] = is_pw_btn_pressed() ? 1 : 0;
+	sys_put_be32(pw_last_ts, &mfg_data[IDX_MFG_TS]);
+
+	err = pw_ble_update_mfg_sign();
+	if (err) {
+        LOG_ERR("failed to sign mfg data (err %d)", err);
+    }
 
     err = bt_le_ext_adv_set_data(adv, advertising, ARRAY_SIZE(advertising), NULL, 0);
     if (err) {
@@ -65,12 +110,11 @@ void pw_ble_refresh_adv_data(struct k_work *work)
 
 K_WORK_DEFINE(refresh_adv_data_work, pw_ble_refresh_adv_data);
 
-
 int pw_ble_init_adv_data()
 {
 	int err;
 
-	err = bt_rand(&initial_ts, sizeof(uint32_t));
+	err = bt_rand(&pw_initial_ts, sizeof(uint16_t));
 	if (err) {
 		LOG_ERR("couldn't generate initial ts (err %d)", err);
 		return -1;
@@ -80,12 +124,20 @@ int pw_ble_init_adv_data()
 	return 0;
 }
 
+void pw_ble_adv_timer_cb(struct k_timer *dummy)
+{
+	LOG_INF("rotate data");
+	pw_ble_refresh_data();
+}
+
+K_TIMER_DEFINE(pw_ble_adv_timer, pw_ble_adv_timer_cb, NULL);
 
 int pw_ble_enable()
 {
 	int err;
 
-	/* Initialize the Bluetooth Subsystem */
+	mbedtls_sha1_init(&mfg_hash_ctx);
+
 	err = bt_enable(NULL);
 	if (err) {
 		LOG_ERR("bluetooth init failed (err %d)", err);
@@ -107,7 +159,6 @@ int pw_ble_enable()
 		return -1;
 	}
 
-	/* Set advertising data */
 	err = pw_ble_init_adv_data();
 	if (err) {
 		LOG_ERR("advertising init failed (err %d)", err);
@@ -120,6 +171,9 @@ int pw_ble_enable()
         LOG_ERR("failed to start extended advertising (err %d)", err);
         return -1;
     }
+	
+	LOG_INF("start adv msg rotation...");
+	k_timer_start(&pw_ble_adv_timer, K_SECONDS(CONFIG_PW_ROTATE_PERIOD_SEC), K_SECONDS(CONFIG_PW_ROTATE_PERIOD_SEC));
 
     LOG_INF("BLE initialized");
     return 0;

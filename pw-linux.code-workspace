@@ -27,7 +27,8 @@
 			"variant": "c",
 			"charconv": "c",
 			"format": "c",
-			"cstdint": "c"
+			"cstdint": "c",
+			"stdbool.h": "c"
 		},
 		"zephyr-ide.projects": {},
 		"python.defaultInterpreterPath": "~/zephyr/.venv/bin/python",
