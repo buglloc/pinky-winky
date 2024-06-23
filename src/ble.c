@@ -16,13 +16,20 @@ LOG_MODULE_REGISTER(pw_ble);
 #define PW_BLE_EXT_ADV_OPTS 0
 #endif
 
+#define IDX_MFG_BATT_LVL  3
+#define IDX_MFG_BTN_STATE (IDX_MFG_BATT_LVL + 1)
+#define IDX_MFG_TS        (IDX_MFG_BTN_STATE + 1)
+#define IDX_MFG_SIGN      (IDX_MFG_TS + 8)
+
 static uint8_t mfg_data[] = {
 	/* company ID must be 0xffff by spec */
 	0xff, 0xff,
 	/* version */
 	0x01,
+	/* battery level */
+	0x00,
 	/* button state */
-	0x01,
+	0x00,
 	/* ts */
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	/* md5 sign */
@@ -42,8 +49,8 @@ void pw_ble_update_adv_data()
 {
 	int err;
 
-	mfg_data[0x03] = pw_btn_is_pressed() ? 1 : 0;
-	sys_put_be64(initial_ts, &mfg_data[0x04]);
+	mfg_data[IDX_MFG_BTN_STATE] = pw_btn_is_pressed() ? 1 : 0;
+	sys_put_be64(initial_ts, &mfg_data[IDX_MFG_TS]);
 
     err = bt_le_ext_adv_set_data(adv, advertising, ARRAY_SIZE(advertising), NULL, 0);
     if (err) {
