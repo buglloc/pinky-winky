@@ -22,7 +22,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
       with:
-        path: pinky-winky
+        path: app
 
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -32,11 +32,11 @@ jobs:
     - name: Setup Zephyr project
       uses: zephyrproject-rtos/action-zephyr-setup@v1
       with:
-        app-path: pinky-winky
+        app-path: app
         toolchains: arm-zephyr-eabi
 
     - name: Build Application
-      working-directory: pinky-winky
+      working-directory: app
       shell: bash
       run: |
-        west build -b ${{ matrix.board }} app
+        west build -b ${{ matrix.board }}
