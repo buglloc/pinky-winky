@@ -1,0 +1,12 @@
+.vscode/                                                                                                                                                                                                            
+build/                                                                                                                                                                                                              
+build_*
+
+*.lo
+*.la
+*.o
+*.loT
+*.hex
+*.bin
+
+external/

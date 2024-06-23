@@ -1,0 +1,17 @@
+source "Kconfig.zephyr"
+
+config ADV_BTN_TIMES
+    int "How many times button press must be notified"
+    default 10
+
+config ADV_USE_PUB_ADDRESS
+    bool "Advertise using identity address."
+    default y
+
+config ADV_INTERVAL_MIN_MS
+    int "Minimum periodic advertising interval"
+    default 100
+
+config ADV_INTERVAL_MAX_MS
+    int "Maximum periodic advertising interval"
+    default 150
