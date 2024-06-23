@@ -1,0 +1,42 @@
+name: Build
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  build_app:
+    runs-on: ubuntu-22.04
+    name: Run Application Build on changes (PR)
+    strategy:
+      matrix: 
+        board:
+         - xiao_ble
+         - holyiot_21014
+    steps:
+    - name: Update PATH for west
+      run: |
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        path: pinky-winky
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: 3.12
+
+    - name: Setup Zephyr project
+      uses: zephyrproject-rtos/action-zephyr-setup@v1
+      with:
+        app-path: pinky-winky
+        toolchains: arm-zephyr-eabi
+
+    - name: Build Application
+      working-directory: pinky-winky
+      shell: bash
+      run: |
+        west build -b ${{ matrix.board }} app
