@@ -20,7 +20,7 @@ LOG_MODULE_REGISTER(pw_btn);
 static const struct gpio_dt_spec pw_btn = GPIO_DT_SPEC_GET(SW_NODE, gpios);
 static struct gpio_callback pw_btn_cb_data;
 
-static uint8_t pw_btn_pressed = 0;
+static bool pw_btn_pressed = 0;
 static uint32_t pw_btn_last_time = 0;
 
 void pw_btn_cb(const struct device *dev, struct gpio_callback *cb, uint32_t pins);
@@ -53,13 +53,13 @@ int pw_btn_enable()
 	return 0;
 }
 
-int pw_btn_is_pressed() {
-	return pw_btn_pressed ? 1 : 0;
+bool is_pw_btn_pressed() {
+	return pw_btn_pressed;
 }
 
 void pw_btn_release_cb(struct k_timer *dummy)
 {
-	pw_btn_pressed = 0;
+	pw_btn_pressed = false;
 	pw_led_off();
 	pw_ble_refresh_data();
 }
@@ -76,7 +76,7 @@ void pw_btn_cb(const struct device *dev, struct gpio_callback *cb, uint32_t pins
 
 	LOG_INF("button pressed at %" PRIu64, k_uptime_get());
 	pw_btn_last_time = time;
-	pw_btn_pressed = 1;
+	pw_btn_pressed = true;
 	pw_led_on();
 	pw_ble_refresh_data();
 	k_timer_start(&pw_btn_release_timer, K_MSEC(CONFIG_ADV_BTN_TIMES * CONFIG_ADV_INTERVAL_MAX_MS), K_NO_WAIT);
