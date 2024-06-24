@@ -6,7 +6,7 @@ Holyiot 21014
 Overview
 ********
 
-The Holyiot 21014 hardware based on the Nordic Semiconductor nRF52810 Arm Cortex-M4 CPU.
+The Holyiot 21014 hardware based on the Nordic Semiconductor `nRF52810`_ Arm Cortex-M4 CPU.
 
 .. figure:: img/holyiot_21014_board.png
      :align: center
@@ -25,8 +25,5 @@ References
 
 .. target-notes::
 
-.. _nRF52810 website:
+.. _nRF52810:
    https://www.nordicsemi.com/Products/Low-power-short-range-wireless/nRF52810
-
-.. _Aliexpress Holyiot store:
-   https://www.aliexpress.com/item/1005004501422185.html
