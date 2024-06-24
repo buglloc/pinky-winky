@@ -4,5 +4,5 @@
 # SPDX-License-Identifier: Apache-2.0
 
 config BOARD_HOLYIOT_21014
-	bool "Holyiot 21014"
-	select SOC_NRF52810_QFAA
+    bool "Holyiot 21014"
+    select SOC_NRF52810_QFAA

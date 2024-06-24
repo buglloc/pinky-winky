@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-22.04
     name: Run Application Build on changes (PR)
     strategy:
-      matrix: 
+      matrix:
         board:
          - xiao_ble
          - holyiot_21014

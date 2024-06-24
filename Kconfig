@@ -22,3 +22,7 @@ config ADV_INTERVAL_MIN_MS
 config ADV_INTERVAL_MAX_MS
     int "Maximum periodic advertising interval"
     default 150
+
+config PW_BATT_VOLTAGE
+    int "Max battery mVoltage"
+    default 3000

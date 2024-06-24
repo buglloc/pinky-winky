@@ -8,6 +8,8 @@
     };
 
     aliases {
-		sw0 = &button0;
-	};
+        sw0 = &button0;
+        sw-gpios = &button0;
+        led-gpios = &led2;
+    };
 };
