@@ -1,24 +1,32 @@
-.. _nrf52dk_nrf52810:
+.. _holyiot_21014:
 
-nRF52810 emulation on nRF52 DK
-##############################
+Holyiot 21014
+########
 
 Overview
 ********
 
-The nrf52dk_nrf52810 board is a modified version of the :ref:`nrf52dk_nrf52832`
-that enforces the limitations imposed by the nRF52810 IC, which is a
-cost-reduced variant of the original nRF52832. Since Nordic does not offer a
-development kit for the nRF52810 you can use this board to develop for this
-IC while using the nRF52 Development Kit (PCA10040).
+The Holyiot 21014 hardware based on the Nordic Semiconductor nRF52810 Arm Cortex-M4 CPU.
 
-See :ref:`nrf52dk_nrf52832` for more information about the development board and
-`nRF52810 website`_ for the official reference on the IC itself.
+.. figure:: img/holyiot_21014_board.png
+     :align: center
+     :alt: holyiot_21014_board
 
+     Holyiot 21014 Board (Credit: Aliexpress Holyiot Official Store)
+
+.. figure:: img/holyiot_21014_dim.png
+     :align: center
+     :alt: holyiot_21014_dimensions
+
+     Holyiot 21014 Dimensions (Credit: Aliexpress Holyiot Official Store)
 
 References
 **********
 
 .. target-notes::
 
-.. _nRF52810 website: https://www.nordicsemi.com/Products/Low-power-short-range-wireless/nRF52810
+.. _nRF52810 website:
+   https://www.nordicsemi.com/Products/Low-power-short-range-wireless/nRF52810
+
+.. _Aliexpress Holyiot store:
+   https://www.aliexpress.com/item/1005004501422185.html
