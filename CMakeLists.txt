@@ -9,6 +9,7 @@ target_sources(app
 PRIVATE
     src/main.c
     src/led.c
+    src/batt.c
     src/btn.c
     src/ble.c
 )

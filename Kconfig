@@ -3,8 +3,8 @@ source "Kconfig.zephyr"
 config PW_SIGN_KEY
     string "Signing key"
 
-config PW_ROTATE_PERIOD_SEC
-    int "How ofen message will be rotated"
+config PW_UPDATE_PERIOD_SEC
+    int "How ofen update adv message data"
     default 15
 
 config ADV_BTN_TIMES
@@ -15,10 +15,22 @@ config ADV_USE_PUB_ADDRESS
     bool "Advertise using identity address."
     default y
 
-config ADV_INTERVAL_MIN_MS
-    int "Minimum periodic advertising interval"
-    default 100
+config ADV_INTERVAL_MIN
+    int "Minimum periodic advertising interval in 0.625 ms units"
+    default 160
 
-config ADV_INTERVAL_MAX_MS
-    int "Maximum periodic advertising interval"
-    default 150
+config ADV_INTERVAL_MAX
+    int "Maximum periodic advertising interval in 0.625 ms units"
+    default 240
+
+config PW_BATT
+    bool "Have battery support"
+    default y
+
+config PW_BATT_MIN_VOLTAGE
+    int "Max battery mVoltage"
+    default 1700
+
+config PW_BATT_MAX_VOLTAGE
+    int "Max battery mVoltage"
+    default 3000

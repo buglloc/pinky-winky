@@ -1,6 +1,6 @@
 .PHONY: all build debug push
 
-BOARD := "xiao_ble"
+BOARD := "holyiot_21014"
 
 all: push
 

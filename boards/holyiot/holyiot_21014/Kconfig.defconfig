@@ -6,6 +6,6 @@
 if BOARD_HOLYIOT_21014
 
 config BOARD
-	default "holyiot_21014"
+    default "holyiot_21014"
 
 endif
