@@ -125,14 +125,6 @@ int pw_ble_init_adv_data()
     return 0;
 }
 
-void pw_ble_adv_timer_cb(struct k_timer *dummy)
-{
-    LOG_INF("rotate data");
-    pw_ble_refresh_data();
-}
-
-K_TIMER_DEFINE(pw_ble_adv_timer, pw_ble_adv_timer_cb, NULL);
-
 int pw_ble_enable()
 {
     int err;
@@ -149,7 +141,7 @@ int pw_ble_enable()
     err = bt_le_ext_adv_create(
         BT_LE_ADV_PARAM(
             BT_LE_ADV_OPT_EXT_ADV | PW_BLE_EXT_ADV_OPTS,
-            CONFIG_ADV_INTERVAL_MIN_MS, CONFIG_ADV_INTERVAL_MAX_MS,
+            CONFIG_ADV_INTERVAL_MIN, CONFIG_ADV_INTERVAL_MAX,
             NULL
         ),
         NULL,
@@ -172,9 +164,6 @@ int pw_ble_enable()
         LOG_ERR("failed to start extended advertising (err %d)", err);
         return -1;
     }
-    
-    LOG_INF("start adv msg rotation...");
-    k_timer_start(&pw_ble_adv_timer, K_SECONDS(CONFIG_PW_ROTATE_PERIOD_SEC), K_SECONDS(CONFIG_PW_ROTATE_PERIOD_SEC));
 
     LOG_INF("BLE initialized");
     return 0;

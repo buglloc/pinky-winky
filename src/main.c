@@ -1,3 +1,4 @@
+#include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 
 #include "led.h"
@@ -42,5 +43,19 @@ int main(void)
     }
 
     LOG_INF("PinkyWinky was started");
+    for (;;) {
+        k_sleep(K_SECONDS(CONFIG_PW_UPDATE_PERIOD_SEC));
+
+        err = pw_batt_refresh_data();
+        if (err) {
+            LOG_ERR("batt refresh failed (err %d)", err);
+        }
+
+        err = pw_ble_refresh_data();
+        if (err) {
+            LOG_ERR("ble refresh failed (err %d)", err);
+        }
+    }
+
     return 0;
 }
