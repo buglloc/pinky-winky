@@ -9,7 +9,7 @@
 
     aliases {
         sw0 = &button0;
-        sw-gpios = &button0;
-        led-gpios = &led2;
+        button-sw = &button0;
+        button-led = &led2;
     };
 };

@@ -6,7 +6,7 @@
 
 LOG_MODULE_REGISTER(pw_led);
 
-#define LED_NODE DT_ALIAS(led_gpios)
+#define LED_NODE DT_ALIAS(button_led)
 #if !DT_NODE_HAS_STATUS(LED_NODE, okay)
 #error "Unsupported board: led0 devicetree alias is not defined"
 #endif

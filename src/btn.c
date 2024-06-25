@@ -12,7 +12,7 @@ LOG_MODULE_REGISTER(pw_btn);
 
 #define BUTTON_DEBOUNCE_DELAY_MS 100
 
-#define SW_NODE DT_ALIAS(sw_gpios)
+#define SW_NODE DT_ALIAS(button_sw)
 #if !DT_NODE_HAS_STATUS(SW_NODE, okay)
 #error "Unsupported board: sw0 devicetree alias is not defined"
 #endif

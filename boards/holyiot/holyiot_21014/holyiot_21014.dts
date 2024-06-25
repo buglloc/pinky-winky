@@ -69,6 +69,10 @@
     status = "okay";
 };
 
+&uicr {
+	gpio-as-nreset;
+};
+
 &spi0 {
     compatible = "nordic,nrf-spi";
     status = "okay";

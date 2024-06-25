@@ -6,9 +6,9 @@
 
 LOG_MODULE_REGISTER(pw_batt);
 
-#if !DT_NODE_EXISTS(DT_PATH(zephyr_user)) || \
-    !DT_NODE_HAS_PROP(DT_PATH(zephyr_user), io_channels) || \
-    !DT_NODE_HAS_PROP(DT_PATH(zephyr_user), io_channels_names)
+#if DT_NODE_EXISTS(DT_PATH(zephyr_user)) && \
+    DT_NODE_HAS_PROP(DT_PATH(zephyr_user), io_channels) && \
+    DT_NODE_HAS_PROP(DT_PATH(zephyr_user), io_channel_names)
 
 static const struct adc_dt_spec adc_channel = ADC_DT_SPEC_GET_BY_NAME(DT_PATH(zephyr_user), batt);
 static uint16_t pw_adc_buf;
