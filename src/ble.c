@@ -20,7 +20,9 @@ LOG_MODULE_REGISTER(pw_ble);
 #define PW_BLE_EXT_ADV_OPTS 0
 #endif
 
-#define IDX_MFG_BATT_LVL  3
+#define IDX_MFG_START     (2)
+#define IDX_MFG_VERSION   (IDX_MFG_START)
+#define IDX_MFG_BATT_LVL  (IDX_MFG_VERSION + 1)
 #define IDX_MFG_BTN_STATE (IDX_MFG_BATT_LVL + 1)
 #define IDX_MFG_TS        (IDX_MFG_BTN_STATE + 1)
 #define IDX_MFG_SIGN      (IDX_MFG_TS + 4)
@@ -28,9 +30,9 @@ LOG_MODULE_REGISTER(pw_ble);
 
 static uint8_t mfg_data[] = {
     /* company ID must be 0xffff by spec */
-    0xff, 0xff,
+    0x5D, 0x03,
     /* version */
-    0x01,
+    0x37,
     /* battery level */
     0x00,
     /* button state */
@@ -76,7 +78,8 @@ int pw_ble_update_mfg_sign()
         return -1;
     }
 
-    err = mbedtls_sha1_update(&mfg_hash_ctx, &mfg_data[0], IDX_MFG_SIGN);
+    /* ignore company id */
+    err = mbedtls_sha1_update(&mfg_hash_ctx, &mfg_data[IDX_MFG_START], IDX_MFG_SIGN - IDX_MFG_START);
     if (err) {
         LOG_ERR("failed to update hash (err %d)", err);
         return -1;
