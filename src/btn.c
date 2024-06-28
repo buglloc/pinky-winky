@@ -62,7 +62,7 @@ void pw_btn_release_cb(struct k_timer *dummy)
 {
     pw_btn_pressed = false;
     pw_led_off();
-    pw_ble_refresh_data();
+    pw_ble_refresh_data_now();
 }
 
 K_TIMER_DEFINE(pw_btn_release_timer, pw_btn_release_cb, NULL);
@@ -79,6 +79,6 @@ void pw_btn_cb(const struct device *dev, struct gpio_callback *cb, uint32_t pins
     pw_btn_last_time = time;
     pw_btn_pressed = true;
     pw_led_on();
-    pw_ble_refresh_data();
+    pw_ble_refresh_data_now();
     k_timer_start(&pw_btn_release_timer, K_MSEC(BUTTON_PRESS_TIMEOUT), K_NO_WAIT);
 }

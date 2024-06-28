@@ -51,7 +51,7 @@ int main(void)
             LOG_ERR("batt refresh failed (err %d)", err);
         }
 
-        err = pw_ble_refresh_data();
+        err = pw_ble_refresh_data(false);
         if (err) {
             LOG_ERR("ble refresh failed (err %d)", err);
         }
