@@ -7,20 +7,20 @@ config PW_UPDATE_PERIOD_SEC
     int "How ofen update adv message data"
     default 15
 
-config ADV_BTN_TIMES
-    int "How many times button press must be notified"
-    default 10
+config PW_BUTTON_INTERVAL
+    int "Button ON state filter in 0.625ms units"
+    default 1600
 
 config ADV_USE_PUB_ADDRESS
     bool "Advertise using identity address."
     default y
 
 config ADV_INTERVAL_MIN
-    int "Minimum periodic advertising interval in 0.625 ms units"
+    int "Minimum periodic advertising interval in 0.625ms units"
     default 160
 
 config ADV_INTERVAL_MAX
-    int "Maximum periodic advertising interval in 0.625 ms units"
+    int "Maximum periodic advertising interval in 0.625ms units"
     default 240
 
 config PW_BATT

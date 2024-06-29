@@ -11,7 +11,7 @@
 LOG_MODULE_REGISTER(pw_btn);
 
 #define BUTTON_DEBOUNCE_DELAY_MS (100)
-#define BUTTON_PRESS_TIMEOUT (CONFIG_ADV_BTN_TIMES * CONFIG_ADV_INTERVAL_MAX * BLE_ADV_INT_UNIT)
+#define BUTTON_ON_STATE_TTL (CONFIG_PW_BUTTON_INTERVAL * BLE_ADV_INT_UNIT)
 
 #define SW_NODE DT_ALIAS(button_sw)
 #if !DT_NODE_HAS_STATUS(SW_NODE, okay)
@@ -80,5 +80,5 @@ void pw_btn_cb(const struct device *dev, struct gpio_callback *cb, uint32_t pins
     pw_btn_pressed = true;
     pw_led_on();
     pw_ble_refresh_data_now();
-    k_timer_start(&pw_btn_release_timer, K_MSEC(BUTTON_PRESS_TIMEOUT), K_NO_WAIT);
+    k_timer_start(&pw_btn_release_timer, K_MSEC(BUTTON_ON_STATE_TTL), K_NO_WAIT);
 }
