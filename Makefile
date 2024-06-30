@@ -2,7 +2,7 @@
 
 BOARD := "holyiot_21014"
 
-all: push
+all: flash
 
 build:
 	west build -p always -b ${BOARD} .
@@ -10,5 +10,5 @@ build:
 debug:
 	west debug -r blackmagicprobe
 
-push: build
+flash: build
 	west -v flash -r blackmagicprobe
