@@ -1,6 +1,6 @@
 # PinkyWinky
 
-Simple BLE tracker based on ZephyrOS for nRF52x SOC.
+Simple BLE tracker based on ZephyrOS for nRF52x SOC (post about: [Open Sesame: PinkyWinky](https://ut.buglloc.com/iot/esphome/open-sesame/))
 
 It is primarily being developed as firmware for the Holyiot nRF52810 Beacon.
 
