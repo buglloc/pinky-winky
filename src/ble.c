@@ -1,6 +1,7 @@
 #include "ble.h"
 
 #include <stdbool.h>
+#include <assert.h>
 
 #include <zephyr/kernel.h>
 #include <zephyr/sys/byteorder.h>
@@ -101,23 +102,26 @@ int pw_ble_refresh_mfg_sign()
     return 0;
 }
 
-int pw_ble_refresh_data(bool calc_only)
+int pw_ble_calc_data()
 {
     int err;
 
     pw_last_ts = pw_initial_ts + k_uptime_seconds();
     sys_put_be32(pw_last_ts, &mfg_data[IDX_MFG_TS]);
     mfg_data[IDX_MFG_BATT_LVL] = pw_batt_percent();
-    mfg_data[IDX_MFG_BTN_STATE] = is_pw_btn_pressed() ? 1 : 0;
+    mfg_data[IDX_MFG_BTN_STATE] = pw_is_btn_pressed() ? 1 : 0;
 
     err = pw_ble_refresh_mfg_sign();
     if (err) {
         LOG_ERR("failed to sign mfg data (err %d)", err);
     }
 
-    if (calc_only) {
-        return 0;
-    }
+    return 0;
+}
+
+int pw_ble_push_data()
+{
+    int err;
 
 #if CONFIG_BT_EXT_ADV
     err = bt_le_ext_adv_set_data(adv, ad_data, ARRAY_SIZE(ad_data), NULL, 0);
@@ -132,15 +136,22 @@ int pw_ble_refresh_data(bool calc_only)
     return 0;
 }
 
-int pw_ble_restart()
+int pw_ble_stop()
+{
+#if CONFIG_BT_EXT_ADV
+    return bt_le_ext_adv_stop();
+#else
+    return bt_le_adv_stop();
+#endif
+}
+
+int pw_ble_start()
 {
     int err;
 #if CONFIG_BT_EXT_ADV
-    bt_le_ext_adv_stop();
     err = bt_le_ext_adv_start(adv, BT_LE_EXT_ADV_START_DEFAULT);
 
 #else
-    bt_le_adv_stop();
     err = bt_le_adv_start(
         BT_LE_ADV_PARAM(
             PW_BLE_EXT_ADV_OPTS,
@@ -155,24 +166,57 @@ int pw_ble_restart()
     return err;
 }
 
-void pw_ble_refresh_data_how_cb(struct k_work *work)
+void pw_ble_refresh_data_now_cb(struct k_work *item)
 {
     int err;
 
-    err = pw_ble_refresh_data(false);
+    err = pw_ble_calc_data();
+    if (err) {
+        LOG_ERR("failed to calculate BLE data");
+        return;
+    }
+
+    pw_ble_stop();
+#if CONFIG_BT_EXT_ADV
+    err = bt_le_ext_adv_set_data(adv, ad_data, ARRAY_SIZE(ad_data), NULL, 0);
     if (err) {
       LOG_ERR("failed to update BLE data");
       return;
     }
+#endif
 
-    err = pw_ble_restart();
+#if CONFIG_PW_ON_STATE_ONLY
+    if (!pw_is_btn_pressed()) {
+        return;
+    }
+#endif
+
+    err = pw_ble_start();
     if (err) {
       LOG_ERR("failed to restart BLE");
       return;
     }
 }
 
-K_WORK_DEFINE(pw_ble_refresh_data_work, pw_ble_refresh_data_how_cb);
+K_WORK_DEFINE(pw_ble_refresh_data_work, pw_ble_refresh_data_now_cb);
+
+int pw_ble_refresh_data()
+{
+    int err;
+    err = pw_ble_calc_data();
+    if (err) {
+        LOG_ERR("failed to calculate BLE data (err %d)", err);
+        return err;
+    }
+
+    err = pw_ble_push_data();
+    if (err) {
+        LOG_ERR("failed to push BLE data (err %d)", err);
+        return err;
+    }
+
+    return 0;
+}
 
 int pw_ble_init_adv_data()
 {
@@ -221,29 +265,17 @@ int pw_ble_enable()
     }
 
     LOG_INF("start extended advertising...");
-    err = pw_ble_refresh_data(false);
+    err = pw_ble_refresh_data();
     if (err) {
-        LOG_ERR("failed to update adv data (err %d)", err);
-        return -1;
-    }
-
-    err = pw_ble_restart();
-    if (err) {
-        LOG_ERR("failed to starb extended advertising (err %d)", err)
+        LOG_ERR("failed to refresh adv data (err %d)", err);
         return -1;
     }
 #else
 
     LOG_INF("start extended advertising...");
-    err = pw_ble_refresh_data(true);
+    err = pw_ble_calc_data();
     if (err) {
-        LOG_ERR("failed to update adv data (err %d)", err);
-        return -1;
-    }
-
-    err = pw_ble_restart();
-    if (err) {
-        LOG_ERR("failed to start advertising (err %d)", err);
+        LOG_ERR("failed to calculate adv data (err %d)", err);
         return -1;
     }
 #endif

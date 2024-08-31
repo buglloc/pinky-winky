@@ -8,6 +8,11 @@
 
 
 LOG_MODULE_REGISTER(pw_main);
+#if CONFIG_PW_ON_STATE_ONLY
+    #define PW_AUTOSTART_BLE 0
+#else
+    #define PW_AUTOSTART_BLE 1
+#endif
 
 int main(void)
 {
@@ -42,6 +47,14 @@ int main(void)
         return 0;
     }
 
+#if PW_AUTOSTART_BLE
+    err = pw_ble_start();
+    if (err) {
+        LOG_ERR("failed to start BLE (err %d)", err);
+        return 0;
+    }
+#endif
+
     LOG_INF("PinkyWinky was started");
     for (;;) {
         k_sleep(K_SECONDS(CONFIG_PW_UPDATE_PERIOD_SEC));
@@ -51,10 +64,14 @@ int main(void)
             LOG_ERR("batt refresh failed (err %d)", err);
         }
 
-        err = pw_ble_refresh_data(false);
+    #if PW_AUTOSTART_BLE
+        err = pw_ble_refresh_data();
         if (err) {
             LOG_ERR("ble refresh failed (err %d)", err);
         }
+
+    #endif
+
     }
 
     return 0;

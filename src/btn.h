@@ -4,6 +4,6 @@
 #include <stdbool.h>
 
 int pw_btn_enable();
-bool is_pw_btn_pressed();
+bool pw_is_btn_pressed();
 
 #endif
