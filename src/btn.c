@@ -3,6 +3,7 @@
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 #include <zephyr/drivers/gpio.h>
+#include <zephyr/sys/atomic.h>
 
 #include "led.h"
 #include "ble.h"
@@ -21,15 +22,30 @@ LOG_MODULE_REGISTER(pw_btn);
 static const struct gpio_dt_spec pw_btn = GPIO_DT_SPEC_GET(SW_NODE, gpios);
 static struct gpio_callback pw_btn_cb_data;
 
-static bool pw_btn_pressed = 0;
+static atomic_val_t pw_btn_pressed;
 static uint32_t pw_btn_last_time = 0;
 
 void pw_btn_cb(const struct device *dev, struct gpio_callback *cb, uint32_t pins);
+
+void pw_clear_btn_pressed()
+{
+    atomic_clear_bit(&pw_btn_pressed, 0);
+}
+
+void pw_set_btn_pressed()
+{
+    atomic_set_bit(&pw_btn_pressed, 0);
+}
+
+bool pw_is_btn_pressed() {
+    return atomic_test_bit(&pw_btn_pressed, 0);
+}
 
 int pw_btn_enable()
 {
     int err;
 
+    pw_clear_btn_pressed();
     if (!device_is_ready(pw_btn.port)) {
         LOG_ERR("button device %s is not ready", pw_btn.port->name);
         return -1;
@@ -54,14 +70,11 @@ int pw_btn_enable()
     return 0;
 }
 
-bool is_pw_btn_pressed() {
-    return pw_btn_pressed;
-}
-
 void pw_btn_release_cb(struct k_timer *dummy)
 {
-    pw_btn_pressed = false;
+    pw_clear_btn_pressed();
     pw_led_off();
+
     pw_ble_refresh_data_now();
 }
 
@@ -77,7 +90,7 @@ void pw_btn_cb(const struct device *dev, struct gpio_callback *cb, uint32_t pins
 
     LOG_INF("button pressed at %" PRIu64, k_uptime_get());
     pw_btn_last_time = time;
-    pw_btn_pressed = true;
+    pw_set_btn_pressed();
     pw_led_on();
     pw_ble_refresh_data_now();
     k_timer_start(&pw_btn_release_timer, K_MSEC(BUTTON_ON_STATE_TTL), K_NO_WAIT);
