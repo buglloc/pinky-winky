@@ -185,12 +185,6 @@ void pw_ble_refresh_data_now_cb(struct k_work *item)
     }
 #endif
 
-#if CONFIG_PW_ON_STATE_ONLY
-    if (!pw_is_btn_pressed()) {
-        return;
-    }
-#endif
-
     err = pw_ble_start();
     if (err) {
       LOG_ERR("failed to restart BLE");

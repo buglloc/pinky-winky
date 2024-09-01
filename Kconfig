@@ -7,9 +7,9 @@ config PW_UPDATE_PERIOD_SEC
     int "How ofen update adv message data"
     default 15
 
-config PW_ON_STATE_ONLY
-    bool "Broadcast only ON state"
-    default n
+config PW_AUTO_STOP
+    bool "Automatic stop broadcasting w/o btn on"
+    default y
 
 config PW_BUTTON_INTERVAL
     int "Button ON state filter in 0.625ms units"

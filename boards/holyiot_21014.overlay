@@ -1,7 +1,7 @@
 / {
     aliases {
         button-sw = &button0;
-        button-led = &led0_blue;
+        button-led = &led0_red;
     };
 
     zephyr,user {
